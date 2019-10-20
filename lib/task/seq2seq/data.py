@@ -299,12 +299,25 @@ def lines2ids(lines, voc, **kwargs):
 
 def make_batch_data(batch, inp_voc, out_voc, force_bos=False, **kwargs):
     inp_lines, out_lines = zip(*batch)
+    print(inp_lines, out_lines)
     inp, inp_len = lines2ids(inp_lines, inp_voc, bos=int(force_bos))
     out, out_len = lines2ids(out_lines, out_voc, bos=int(force_bos))
 
     batch_data = dict(
         inp=np.array(inp, dtype=np.int32),
         inp_len=np.array(inp_len, dtype=np.int32),
+        out=np.array(out, dtype=np.int32),
+        out_len=np.array(out_len, dtype=np.int32))
+
+    return batch_data
+
+
+def make_batch_data_new(batch, inp_voc, out_voc, force_bos=False, **kwargs):
+    inp_lines, out_lines = zip(*batch)
+    print(inp_lines, out_lines)
+    out, out_len = lines2ids(out_lines, out_voc, bos=int(force_bos))
+
+    batch_data = dict(
         out=np.array(out, dtype=np.int32),
         out_len=np.array(out_len, dtype=np.int32))
 

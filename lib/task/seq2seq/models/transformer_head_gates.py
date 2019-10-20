@@ -222,7 +222,7 @@ class Transformer:
 
             return enc_inp, enc_attn_mask
 
-    def decode(self, out, out_len, out_reverse, enc_out, enc_attn_mask, is_train):
+    def decode(self, out, out_len, is_train):
         with dropout_scope(is_train), tf.name_scope('mod_dec') as scope:
             # Embeddings
             emb_out = self.emb_out(out)  # [batch_size * nout * emb_dim]
@@ -236,20 +236,21 @@ class Transformer:
             dec_attn_mask = self._make_dec_attn_mask(out)  # [1 * 1 * nout * nout]
 
             offset = 'random' if self.dst_rand_offset else 0
-            dec_inp = self._add_timing_signal(emb_out, offset=offset, inp_reverse=out_reverse)
+            dec_inp = self._add_timing_signal(emb_out, offset=offset, inp_reverse=None)
             # Apply dropouts
             if is_dropout_enabled():
                 dec_inp = tf.nn.dropout(dec_inp, 1.0 - self.res_dropout)
 
             # bypass info from Encoder to avoid None gradients for num_layers_dec == 0
-            if self.num_layers_dec == 0:
-                inp_mask = tf.squeeze(tf.transpose(enc_attn_mask, perm=[3, 1, 2, 0]), 3)
-                dec_inp += tf.reduce_mean(enc_out * inp_mask, axis=[0, 1], keep_dims=True)
+            # skip this bullshit
+            # if self.num_layers_dec == 0:
+            #     inp_mask = tf.squeeze(tf.transpose(enc_attn_mask, perm=[3, 1, 2, 0]), 3)
+            #     dec_inp += tf.reduce_mean(enc_out * inp_mask, axis=[0, 1], keep_dims=True)
 
             # Decoder
             for layer in range(self.num_layers_dec):
                 dec_inp = self.dec_attn[layer](dec_inp, dec_attn_mask)
-                dec_inp = self.dec_enc_attn[layer](dec_inp, enc_attn_mask, enc_out)
+                # dec_inp = self.dec_enc_attn[layer](dec_inp, enc_attn_mask, enc_out)
                 dec_inp = self.dec_ffn[layer](dec_inp, summarize_preactivations=self.summarize_preactivations)
 
             if self.normalize_out:
@@ -371,16 +372,16 @@ class Model(TranslateModelBase):
 
     # Train interface
     def encode_decode(self, batch, is_train, score_info=False):
-        inp = batch['inp']  # [batch_size * ninp]
+        # inp = batch['inp']  # [batch_size * ninp]
         out = batch['out']  # [batch_size * nout]
-        inp_len = batch.get('inp_len', infer_length(inp, self.inp_voc.eos, time_major=False))  # [batch]
+        # inp_len = batch.get('inp_len', infer_length(inp, self.inp_voc.eos, time_major=False))  # [batch]
         out_len = batch.get('out_len', infer_length(out, self.out_voc.eos, time_major=False))  # [batch]
 
-        out_reverse = tf.zeros_like(inp_len)  # batch['out_reverse']
+        # out_reverse = tf.zeros_like(inp_len)  # batch['out_reverse']
 
         # rdo: [batch_size * nout * hid_dim]
-        enc_out, enc_attn_mask = self.transformer.encode(inp, inp_len, is_train)
-        rdo = self.transformer.decode(out, out_len, out_reverse, enc_out, enc_attn_mask, is_train)
+        # enc_out, enc_attn_mask = self.transformer.encode(inp, inp_len, is_train)
+        rdo = self.transformer.decode(out, out_len, is_train)
 
         return rdo
 
