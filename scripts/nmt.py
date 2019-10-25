@@ -483,6 +483,8 @@ def TRAIN(args):
 #                                   Main
 
 def main():
+    print(os.environ.get('NCCL_TREE_THRESHOLD'))
+    print(os.environ.get('NCCL_P2P_LEVEL'))
     # Create parser.
     p = argparse.ArgumentParser('nmt.py')
     subp = p.add_subparsers(dest='cmd')

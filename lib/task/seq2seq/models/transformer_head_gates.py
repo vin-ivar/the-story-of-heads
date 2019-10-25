@@ -63,10 +63,10 @@ class Transformer:
         with tf.variable_scope(name):
             max_voc_size = max(inp_voc.size(), out_voc.size())
 
-            self.emb_inp = Embedding(
-                'emb_inp', max_voc_size if share_emb else inp_voc.size(), emb_size,
-                initializer=tf.random_normal_initializer(0, emb_size ** -.5),
-                device=emb_inp_device)
+            # self.emb_inp = Embedding(
+            #     'emb_inp', max_voc_size if share_emb else inp_voc.size(), emb_size,
+            #     initializer=tf.random_normal_initializer(0, emb_size ** -.5),
+            #     device=emb_inp_device)
 
             self.emb_out = Embedding(
                 'emb_out', max_voc_size if share_emb else out_voc.size(), emb_size,
@@ -74,9 +74,9 @@ class Transformer:
                 initializer=tf.random_normal_initializer(0, emb_size ** -.5),
                 device=emb_out_device)
 
-            self.emb_inp_bias = 0
-            if inp_emb_bias:
-                self.emb_inp_bias = get_model_variable('emb_inp_bias', shape=[1, 1, emb_size])
+            # self.emb_inp_bias = 0
+            # if inp_emb_bias:
+            #     self.emb_inp_bias = get_model_variable('emb_inp_bias', shape=[1, 1, emb_size])
 
             def get_layer_params(layer_prefix, layer_idx):
                 layer_name = '%s-%i' % (layer_prefix, layer_idx)
@@ -162,16 +162,16 @@ class Transformer:
             dec_enc_attn_format = 'use_kv' if multihead_attn_format == 'v1' else 'combined'
 
             # Encoder Layers
-            self.enc_attn = [attn_layer_concrete_heads('enc_attn', i) if 'enc-self' in concrete_heads else
-                             attn_layer('enc_attn', i) if not 'enc-self' in alive_heads else
-                             attn_layer_fixed_alive_heads('enc_attn', i, alive_heads['enc-self'][i])
-                             for i in range(self.num_layers_enc)]
+            # self.enc_attn = [attn_layer_concrete_heads('enc_attn', i) if 'enc-self' in concrete_heads else
+            #                  attn_layer('enc_attn', i) if not 'enc-self' in alive_heads else
+            #                  attn_layer_fixed_alive_heads('enc_attn', i, alive_heads['enc-self'][i])
+            #                  for i in range(self.num_layers_enc)]
 
-            self.enc_ffn = [ffn_layer('enc_ffn', i, enc_ffn_hid_size) for i in range(self.num_layers_enc)]
+            # self.enc_ffn = [ffn_layer('enc_ffn', i, enc_ffn_hid_size) for i in range(self.num_layers_enc)]
 
-            if self.normalize_out:
-                self.enc_out_norm = LayerNorm('enc_out_norm',
-                                              inp_size=emb_size if self.num_layers_enc == 0 else hid_size)
+            # if self.normalize_out:
+            #     self.enc_out_norm = LayerNorm('enc_out_norm',
+            #                                   inp_size=emb_size if self.num_layers_enc == 0 else hid_size)
 
             # Decoder layers
             self.dec_attn = [attn_layer_concrete_heads('dec_attn', i) if 'dec-self' in concrete_heads else
@@ -179,12 +179,12 @@ class Transformer:
                              attn_layer_fixed_alive_heads('dec_attn', i, alive_heads['dec-self'][i])
                              for i in range(self.num_layers_dec)]
 
-            self.dec_enc_attn = [attn_layer_concrete_heads('dec_enc_attn', i, _format=dec_enc_attn_format) \
-                                 if 'dec-enc' in concrete_heads else \
-                             attn_layer('dec_enc_attn', i, _format=dec_enc_attn_format) if \
-                    not 'dec-enc' in alive_heads else \
-                             attn_layer_fixed_alive_heads('dec_enc_attn', i, alive_heads['dec-enc'][i], _format=dec_enc_attn_format)
-                             for i in range(self.num_layers_enc)]
+            # self.dec_enc_attn = [attn_layer_concrete_heads('dec_enc_attn', i, _format=dec_enc_attn_format) \
+            #                      if 'dec-enc' in concrete_heads else \
+            #                  attn_layer('dec_enc_attn', i, _format=dec_enc_attn_format) if \
+            #         not 'dec-enc' in alive_heads else \
+            #                  attn_layer_fixed_alive_heads('dec_enc_attn', i, alive_heads['dec-enc'][i], _format=dec_enc_attn_format)
+            #                  for i in range(self.num_layers_enc)]
 
             self.dec_ffn = [ffn_layer('dec_ffn', i, dec_ffn_hid_size) for i in range(self.num_layers_dec)]
 
