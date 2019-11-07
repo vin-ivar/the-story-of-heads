@@ -52,7 +52,7 @@ class TranslateTicker(DistributedTicker):
             self._score()
 
     def after_train_batch(self, ingraph_result):
-        if self.is_it_time_yet():
+        if self.is_it_time_yet() and False:
             self._score()
 
     def _score(self):
